@@ -82,7 +82,7 @@ def organize_file(folder_path: str):
             logger.warning("Skipping hidden/system file")
             continue
         file_path = os.path.join(folder_path, file)
-
+        file_moved = 0
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(file)
             ext = ext.lower()
@@ -95,6 +95,7 @@ def organize_file(folder_path: str):
                     os.makedirs(target_dir, exist_ok=True)
                     try:
                         shutil.move(file_path, target_dir)
+                        file_moved += 1
                         moved = True
                         break
                     except Exception as e:
@@ -105,10 +106,11 @@ def organize_file(folder_path: str):
                 os.makedirs(others_dir, exist_ok=True)
                 try:
                     shutil.move(file_path, os.path.join(others_dir, file))
+                    file_moved += 1
                 except Exception as e:
                     logger.error(f"Error : {e}")
 
-    logger.info("✅ Organizing complete.")
+    logger.info(f"✅ Organizing complete. Total file moved {file_moved}")
 
 
 def dry_run(folder_path: str):
@@ -160,7 +162,7 @@ def dry_run(folder_path: str):
             logger.debug(chk_msg)
             logger.info(f"Moving '{file}' to the '{destination_folder_name}/'")
 
-    logger.debug("✅ Dry Run completed, Check the process .")
+    logger.info("✅ Dry Run completed, Check the process .")
 
 
 if __name__ == "__main__":
