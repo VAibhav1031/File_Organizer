@@ -5,11 +5,12 @@ from log_config import setup_logging
 import logging
 
 
+# __name__ if  you have  bigger application having different modules and all
 logger = logging.getLogger("organizer")
 
 FILE_TYPES = {
     "Pictures": [".png", ".jpeg", ".jpg", ".webp"],
-    "Videos": [".mov", ".mkv", ".mp4"],
+    "Videos": [".mov", ".mkv", ".mp4", ".gif"],
     "Documents": [".pdf", ".md", ".txt", ".text", ".epub", ".docx", ".csv"],
     "Archives": [".zip", ".tar", ".gz", ".rar"],
     "Executables": [".exe", ".sh", ".run", ".appimage"],
@@ -61,10 +62,6 @@ def forbidden_path(folder_path):
 
 
 def organize_file(folder_path: str):
-    if not os.path.isdir(folder_path):
-        logger.warning("❌ It is  not  a folder/directory ")
-        return
-
     if not forbidden_path(folder_path):
         return
     files = os.listdir(folder_path)
@@ -172,10 +169,10 @@ if __name__ == "__main__":
     setup_logging(verbose=verbose, quiet=quiet, log_to_file=log_to_file)
     if len(sys.argv) < 2:
         print("Usage: python file_organize.py <command> [args...]")
-        print("command: ")
-        print("dry_run: IT is  used  to dry run all movements")
-        print("organize: IT is  used to  organize  files according to their type")
-        print("  --help, -h : Show this help message.")
+        print("Commands: ")
+        print("dry_run      : Stimulates the file Organization in specified folder")
+        print("organize     : Organizeed the file in specified folder")
+        print("--help, -h   : Show this help message.")
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -183,7 +180,7 @@ if __name__ == "__main__":
         print("Usage: python file_organize.py <command> [args...]")
         print("Commands: ")
         print("dry_run      : Stimulates the file Organization in specified folder")
-        print("organize: Organizeed the file in specified folder")
+        print("organize     : Organizeed the file in specified folder")
         print("--help, -h   : Show this help message.")
         sys.exit(0)
 
@@ -195,12 +192,12 @@ if __name__ == "__main__":
     if target_folder is None:
         print(f"No Folder path has been given for the {command}")
         target_folder = input("Enter the absoulte folder path: ").strip()
-        if not target_folder:
+        if not target_folder:  # if the USERRRR press ENTER
             print("ABORTING, Exiting")
             sys.exit(1)
 
     if not os.path.isdir(target_folder):
-        print("❌ It is  not  a folder/directory ")
+        logger.warning("❌ It is  not  a folder/directory ")
         sys.exit(1)
 
     if command == "dry_run":
@@ -220,5 +217,6 @@ if __name__ == "__main__":
 
     else:
         print(f"❌ Error: Unkown command {command}")
+        logger.warning(f"User entered unknown command: {command}")
         print("Use: python organize_file.py --help or --h, for usage instruction")
         sys.exit(0)
