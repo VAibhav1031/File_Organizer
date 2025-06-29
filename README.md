@@ -1,10 +1,22 @@
-# File Organizer
-##  what  are the requirements  to  do
-- Files must be organized according to there type
-- Like image should be go to the image folder or documents should go to the documents folder  and else
-- There is few  thing to notice if there is already a type folder like  Document then we should  move file to that location
-- One doubt since we are using Linux we have Document, Desktop , Music , Pictures, Videos already there
+# File Organizer CLI
 
-- Should we do this to them like moving file to them or create new one's  subfolder  in the current directory
-for organizing that directory
+A safe, customizable, Python-based file organizer with support for:
+
+- Dry run mode
+- Logging (console + file)
+- CLI flags for log level and verbosity
+- Safe path checks
+- Extensible config
+
+## Usage
+
+```bash
+python file_organize.py organize ~/Downloads --loglevel DEBUG --logfile
+
+
+# Ongoing process:
+
+- Adding Recursive (--recursive)  functionality for subfolder arrangement
+- Refactoring to argparse from sys.argv for better usage and flexibility
+- Basic Test for evaluation
 
