@@ -1,0 +1,15 @@
+# Ignore all .log files
+*.log
+
+# Ignore any backup or swap files (optional, but helpful)
+*.swp
+*.bak
+*~
+
+# Bytecode
+__pycache__/
+*.py[cod]
+
+# Logs (explicit)
+organize.log
+
