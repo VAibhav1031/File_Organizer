@@ -10,11 +10,12 @@ A safe, customizable, Python-based file organizer with support for:
 
 ## Usage
 
-```bash
-python file_organize.py organize ~/Downloads --loglevel DEBUG --logfile
+```
+python
+file_organize.py organize ~/Downloads --loglevel DEBUG --logfile
+```
 
-
-# Ongoing process:
+## Ongoing process:
 
 - Adding Recursive (--recursive)  functionality for subfolder arrangement
 - Refactoring to argparse from sys.argv for better usage and flexibility
