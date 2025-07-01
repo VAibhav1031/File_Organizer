@@ -41,9 +41,19 @@ FORBIDDEN_PATHS = [
 ]
 
 
+def color_level(level, text):
+    colors = {
+        "INFO": Fore.GREEN,
+        "WARNING": Fore.YELLOW,
+        "ERROR": Fore.RED,
+        "DEBUG": Fore.CYAN,
+    }
+    return colors.get(level, "") + text + Style.RESET_ALL
+
+
 def forbidden_path(folder_path):
     if os.path.abspath(folder_path) in FORBIDDEN_PATHS:
-        logger.warning(Fore.RED + "❌ Dangerous directory. Aborting.")
+        logger.warning("❌ Dangerous directory. Aborting.")
         return False
     return True
 
@@ -51,7 +61,7 @@ def forbidden_path(folder_path):
 def confirm_prompt(msg, depth):
     indent = "  " * depth
     return input(
-        Fore.YELLOW + f"{indent}{msg} [Y/n]: " + Style.RESET_ALL
+        f"{indent}{Fore.YELLOW}{msg} [Y/n]: {Style.RESET_ALL}"
     ).strip().lower() in ["", "y", "yes"]
 
 
@@ -60,7 +70,7 @@ def organize_file(folder_path, depth, recursive=False):
         return
     files = os.listdir(folder_path)
 
-    logger.info(Fore.CYAN + f"📂 Starting organization in '{folder_path}'...")
+    logger.info(f"📂 Starting organization in '{folder_path}'...")
     file_moved = 0
     for file in files:
         file_path = os.path.join(folder_path, file)
@@ -96,7 +106,7 @@ def organize_file(folder_path, depth, recursive=False):
                         moved = True
                         break
                     except Exception as e:
-                        logger.error(Fore.RED + f"Error: {e}")
+                        logger.error(f"Error: {e}")
 
             if not moved:
                 others_dir = os.path.join(folder_path, "Others")
@@ -105,19 +115,17 @@ def organize_file(folder_path, depth, recursive=False):
                     shutil.move(file_path, os.path.join(others_dir, file))
                     file_moved += 1
                 except Exception as e:
-                    logger.error(Fore.RED + f"Error : {e}")
+                    logger.error(f"Error : {e}")
 
     if depth == 0:
-        logger.info(
-            Fore.GREEN + f"✅ Organizing complete. Total file moved {file_moved}"
-        )
+        logger.info(f"✅ Organizing complete. Total file moved {file_moved}")
 
 
 def dry_run(folder_path: str, depth, recursive=False):
     if not forbidden_path(folder_path):
         return
 
-    print(Fore.CYAN + f"\n📁 DRY RUN: {folder_path}\n")
+    print(f"\n📁 {Fore.CYAN}DRY RUN: {folder_path}{Style.RESET_ALL}\n")
     files = os.listdir(folder_path)
 
     would_be_created_folders = {
@@ -159,10 +167,10 @@ def dry_run(folder_path: str, depth, recursive=False):
             else:
                 logger.debug(f"Folder exists: '{destination_folder}/'")
 
-            logger.info(Fore.YELLOW + f"Would move: '{file}' → {destination_folder}/")
+            logger.info(f"Would move: '{file}' → {destination_folder}/")
 
     if depth == 0:
-        logger.info(Fore.GREEN + "✅ Dry Run completed.")
+        logger.info("✅ Dry Run completed.")
 
 
 if __name__ == "__main__":
@@ -179,9 +187,11 @@ if __name__ == "__main__":
     group.add_argument(
         "--verbose", "-v", action="store_true", help="Enable Verbose Output"
     )
-    group.add_argument("--quiet", "-q", action="store_true", help="Suppress Output")
+    group.add_argument("--quiet", "-q", action="store_true",
+                       help="Suppress Output")
 
-    parser.add_argument("--logfile", action="store_true", help="Log to file as well")
+    parser.add_argument("--logfile", action="store_true",
+                        help="Log to file as well")
     parser.add_argument(
         "--recursive", action="store_true", help="Organize subdirectories too"
     )
@@ -193,23 +203,27 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    setup_logging(verbose=args.verbose, quiet=args.quiet, log_to_file=args.logfile)
+    setup_logging(verbose=args.verbose, quiet=args.quiet,
+                  log_to_file=args.logfile)
 
     if not os.path.isdir(args.path):
-        logger.warning(Fore.RED + "❌ Provided path is not a directory")
+        logger.warning("❌ Provided path is not a directory")
         sys.exit(1)
 
     if args.command == "dry_run":
         dry_run(args.path, 0, args.recursive)
     elif args.command == "organize":
         print(
-            Fore.RED
-            + "⚠️ WARNING: This will move files. It cannot be undone automatically."
+            f"{
+                Fore.RED
+            }⚠️ WARNING: This will move files. It cannot be undone automatically.{
+                Style.RESET_ALL
+            }"
         )
         if input(
-            Fore.YELLOW + "Continue? [Y/n]: " + Style.RESET_ALL
+            f"{Fore.YELLOW}Continue? [Y/n]: {Style.RESET_ALL}"
         ).strip().lower() in ["", "y", "yes"]:
             organize_file(args.path, 0, args.recursive)
         else:
-            print("Operation Cancelled")
+            print(f"{Fore.RED}Operation Cancelled{Style.RESET_ALL}")
             sys.exit(0)
