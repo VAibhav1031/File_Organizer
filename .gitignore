@@ -13,3 +13,6 @@ __pycache__/
 # Logs (explicit)
 organize.log
 
+
+#virtual
+.venv/

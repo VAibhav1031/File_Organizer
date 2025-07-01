@@ -4,9 +4,10 @@ import sys
 from log_config import setup_logging
 import logging
 import argparse
+from colorama import Fore, Style, init
 
+init(autoreset=True)
 
-# __name__ if  you have  bigger application having different modules and all
 logger = logging.getLogger("organizer")
 
 FILE_TYPES = {
@@ -29,7 +30,6 @@ FILE_TYPES = {
     ],
 }
 
-
 FORBIDDEN_PATHS = [
     os.path.abspath("/"),
     os.path.abspath("/home"),
@@ -42,24 +42,17 @@ FORBIDDEN_PATHS = [
 
 
 def forbidden_path(folder_path):
-    if (
-        os.path.abspath(folder_path) in FORBIDDEN_PATHS
-    ):  # os.path.abspath() helps  in following absolute path convention , it doesnt gurante path authentacity ,
-        # for example . it is a current working directory it could be home also anything ,
-        # same (../) or (../../) will be  a directory excluding current one from it  so
-        # we dont know that path may look ok  but it could be the one of the forbidden_path
-        # clear :::
-        # os.path.abspath(".")        # ➝ "/home/vaibhav/Projects"
-        # os.path.abspath("../")      # ➝ "/home/vaibhav"
-        # os.path.abspath("/etc")     # ➝ "/etc" (unchanged, already absolute)
-        # os.path.abspath("////usr")  # ➝ "/usr"
-        #
-        # so we cant  directly match the folder_path to the forbidden_paths could be ther absoulte version is
-        # DANGEROUSSSSS
-
-        logger.warning("❌ Dangerous directory. Aborting.")
+    if os.path.abspath(folder_path) in FORBIDDEN_PATHS:
+        logger.warning(Fore.RED + "❌ Dangerous directory. Aborting.")
         return False
     return True
+
+
+def confirm_prompt(msg, depth):
+    indent = "  " * depth
+    return input(
+        Fore.YELLOW + f"{indent}{msg} [Y/n]: " + Style.RESET_ALL
+    ).strip().lower() in ["", "y", "yes"]
 
 
 def organize_file(folder_path, depth, recursive=False):
@@ -67,49 +60,34 @@ def organize_file(folder_path, depth, recursive=False):
         return
     files = os.listdir(folder_path)
 
-    logger.info(f"📂 Starting organization in '{folder_path}'...")
+    logger.info(Fore.CYAN + f"📂 Starting organization in '{folder_path}'...")
     file_moved = 0
     for file in files:
+        file_path = os.path.join(folder_path, file)
         logger.debug(f"Processing file: {file}")
+
         if (
             file.startswith(".")
             or file.lower().endswith((".db", ".ini"))
             or file.lower() in [".DS_Store", "Thumbs.db", "desktop.ini"]
             or file in FILE_TYPES.keys()
-            or (os.path.isdir(os.path.join(folder_path, file)) and not recursive)
+            or (os.path.isdir(file_path) and not recursive)
         ):
-            logger.warning("Skipping hidden/system file")
+            logger.debug("Skipping hidden/system file")
             continue
 
-        if os.path.isdir(os.path.join(folder_path, file)) and recursive:
-            indent = " " * depth
-            print(
-                f"{indent}⚠️ Folder '{
-                    os.path.join(folder_path, file)
-                }' looks like an application or nested structure."
-            )
-            confirm = (
-                input("Do you want to organize this folder too? yes/no: ")
-                .strip()
-                .lower()
-            )
-            if confirm != "yes":
-                continue
-            organize_file(
-                os.path.join(folder_path, file),
-                depth + 1,
-                recursive=recursive,
-            )
+        if os.path.isdir(file_path) and recursive:
+            if confirm_prompt(f"⚠️ Enter folder: '{file_path}'?", depth):
+                organize_file(file_path, depth + 1, recursive=recursive)
+            continue
 
-        file_path = os.path.join(folder_path, file)
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(file)
             ext = ext.lower()
 
             moved = False
-
-            for folder, extension in FILE_TYPES.items():
-                if ext in extension:
+            for folder, extensions in FILE_TYPES.items():
+                if ext in extensions:
                     target_dir = os.path.join(folder_path, folder)
                     os.makedirs(target_dir, exist_ok=True)
                     try:
@@ -118,7 +96,7 @@ def organize_file(folder_path, depth, recursive=False):
                         moved = True
                         break
                     except Exception as e:
-                        logger.error(f"Error: {e}")
+                        logger.error(Fore.RED + f"Error: {e}")
 
             if not moved:
                 others_dir = os.path.join(folder_path, "Others")
@@ -127,20 +105,21 @@ def organize_file(folder_path, depth, recursive=False):
                     shutil.move(file_path, os.path.join(others_dir, file))
                     file_moved += 1
                 except Exception as e:
-                    logger.error(f"Error : {e}")
+                    logger.error(Fore.RED + f"Error : {e}")
+
     if depth == 0:
-        logger.info(f"✅ Organizing complete. Total file moved {file_moved}")
+        logger.info(
+            Fore.GREEN + f"✅ Organizing complete. Total file moved {file_moved}"
+        )
 
 
 def dry_run(folder_path: str, depth, recursive=False):
     if not forbidden_path(folder_path):
         return
 
-    print("\n")
-    logger.info(f"DRY RUN MODE {folder_path}:\n")
+    print(Fore.CYAN + f"\n📁 DRY RUN: {folder_path}\n")
     files = os.listdir(folder_path)
-    # Keep track of folders that *would be* created during this dry run
-    # Initialize with existing subdirectories of the target folder
+
     would_be_created_folders = {
         d
         for d in os.listdir(folder_path)
@@ -155,120 +134,82 @@ def dry_run(folder_path: str, depth, recursive=False):
             or file.lower().endswith((".db", ".ini"))
             or file.lower() in [".DS_Store", "Thumbs.db", "desktop.ini"]
             or file in FILE_TYPES.keys()
-            or (os.path.isdir(os.path.join(folder_path, file)) and not recursive)
+            or (os.path.isdir(file_path) and not recursive)
         ):
             continue
 
-        if os.path.isdir(os.path.join(folder_path, file)) and recursive:
-            indent = " " * depth
-            print(
-                f"{indent}⚠️ Folder '{
-                    os.path.join(folder_path, file)
-                }' looks like an application or nested structure."
-            )
-            confirm = (
-                input("Do you want to organize this folder too? yes/no").strip().lower()
-            )
-            if confirm != "yes":
-                continue
-            dry_run(
-                os.path.join(folder_path, file),
-                depth + 1,
-                recursive=recursive,
-            )
+        if os.path.isdir(file_path) and recursive:
+            if confirm_prompt(f"⚠️ Enter folder: '{file_path}'?", depth):
+                dry_run(file_path, depth + 1, recursive=recursive)
+            continue
 
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(file)
             ext = ext.lower()
 
-            destination_folder_name = "Others"  # Default to Others
-
-            for folder_type, extensions_list in FILE_TYPES.items():
-                if ext in extensions_list:
-                    destination_folder_name = folder_type
+            destination_folder = "Others"
+            for folder_type, extensions in FILE_TYPES.items():
+                if ext in extensions:
+                    destination_folder = folder_type
                     break
 
-            # Now, check if this folder *would be* created or already exists
-            if destination_folder_name in would_be_created_folders:
-                chk_msg = f"Directory '{
-                    destination_folder_name}/' already exists."
+            if destination_folder not in would_be_created_folders:
+                logger.debug(f"Would create folder: '{destination_folder}/'")
+                would_be_created_folders.add(destination_folder)
             else:
-                chk_msg = f"We would create the folder '{
-                    destination_folder_name}/'."
-                would_be_created_folders.add(
-                    destination_folder_name
-                )  # Mark it as "would be created"
+                logger.debug(f"Folder exists: '{destination_folder}/'")
 
-            logger.debug(chk_msg)
-            logger.info(f"Moving '{file}' to the '{destination_folder_name}/'")
+            logger.info(Fore.YELLOW + f"Would move: '{file}' → {destination_folder}/")
 
     if depth == 0:
-        logger.info("✅ Dry Run completed, Check the process .")
+        logger.info(Fore.GREEN + "✅ Dry Run completed.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This  is  File Organizer CLI ",
+        description="📦 File Organizer CLI",
         epilog="Example: python organize.py organize ~/Downloads --verbose",
     )
     parser.add_argument(
-        "command",
-        choices=["dry_run", "organize"],
-        help="Choose what action to perform ",
+        "command", choices=["dry_run", "organize"], help="Action to perform"
     )
-    parser.add_argument("path", help="Target folder path to organize ")
+    parser.add_argument("path", help="Target folder path to organize")
 
-    # grouping the conflicting optional arguments like --verbose and --quiet which can cause problem together
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "--verbose", "-v", action="store_true", help=" Enable Verbose Output"
+        "--verbose", "-v", action="store_true", help="Enable Verbose Output"
     )
-    group.add_argument("--quiet", "-q", action="store_true",
-                       help="Supress Output")
+    group.add_argument("--quiet", "-q", action="store_true", help="Suppress Output")
 
+    parser.add_argument("--logfile", action="store_true", help="Log to file as well")
     parser.add_argument(
-        "--logfile", action="store_true", help="Log to file instead of just console"
+        "--recursive", action="store_true", help="Organize subdirectories too"
     )
-
-    parser.add_argument(
-        "--recursive", action="store_true", help="Also organize files in subdirectories"
-    )
-
-    # this  we  are gonnnnnna  use  to make the version of  the cli
     parser.add_argument(
         "--version",
         action="version",
-        version="File Organizer CLI version 1.0.0",
-        help="Show program's version number and exit",
+        version="File Organizer CLI v1.0.0",
+        help="Show version and exit",
     )
 
     args = parser.parse_args()
+    setup_logging(verbose=args.verbose, quiet=args.quiet, log_to_file=args.logfile)
 
-    setup_logging(verbose=args.verbose, quiet=args.quiet,
-                  log_to_file=args.logfile)
-    command = args.command
-    target_folder = args.path
-    if not os.path.isdir(target_folder):
-        logger.warning("❌ It is  not  a folder/directory ")
+    if not os.path.isdir(args.path):
+        logger.warning(Fore.RED + "❌ Provided path is not a directory")
         sys.exit(1)
 
-    if command == "dry_run":
-        dry_run(target_folder, 0, args.recursive)
-
-    elif command == "organize":
+    if args.command == "dry_run":
+        dry_run(args.path, 0, args.recursive)
+    elif args.command == "organize":
         print(
-            "WARNING: This will reorganize the files. This process is irreversible (you can do manually but for big)"
+            Fore.RED
+            + "⚠️ WARNING: This will move files. It cannot be undone automatically."
         )
-
-        confirm = input("Are you sure (YES/NO): ")
-        if confirm.lower() == "yes":
-            organize_file(target_folder, 0, args.recursive)
+        if input(
+            Fore.YELLOW + "Continue? [Y/n]: " + Style.RESET_ALL
+        ).strip().lower() in ["", "y", "yes"]:
+            organize_file(args.path, 0, args.recursive)
         else:
             print("Operation Cancelled")
             sys.exit(0)
-
-    else:
-        print(f"❌ Error: Unkown command {command}")
-        logger.warning(f"User entered unknown command: {command}")
-        print("Use: python organize_file.py --help or --h, for usage instruction")
-        sys.exit(1)
