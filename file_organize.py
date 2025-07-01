@@ -3,6 +3,7 @@ import shutil
 import sys
 from log_config import setup_logging
 import logging
+import argparse
 
 
 # __name__ if  you have  bigger application having different modules and all
@@ -163,39 +164,46 @@ def dry_run(folder_path: str):
 
 
 if __name__ == "__main__":
-    verbose = "--verbose" in sys.argv
-    log_to_file = "--logfile" in sys.argv
-    quiet = "--quiet" in sys.argv
-    setup_logging(verbose=verbose, quiet=quiet, log_to_file=log_to_file)
-    if len(sys.argv) < 2:
-        print("Usage: python file_organize.py <command> [args...]")
-        print("Commands: ")
-        print("dry_run      : Stimulates the file Organization in specified folder")
-        print("organize     : Organizeed the file in specified folder")
-        print("--help, -h   : Show this help message.")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="This  is  File Organizer CLI ",
+        epilog="Example: python organize.py organize ~/Downloads --verbose",
+    )
+    parser.add_argument(
+        "command",
+        choices=["dry_run", "organize"],
+        help="Choose what action to perform ",
+    )
+    parser.add_argument("path", help="Target folder path to organize ")
 
-    command = sys.argv[1].lower()
-    if command in ("--help", "--h"):
-        print("Usage: python file_organize.py <command> [args...]")
-        print("Commands: ")
-        print("dry_run      : Stimulates the file Organization in specified folder")
-        print("organize     : Organizeed the file in specified folder")
-        print("--help, -h   : Show this help message.")
-        sys.exit(0)
+    # grouping the conflicting optional arguments like --verbose and --quiet which can cause problem together
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-v", "--verbose", action="store_true", help=" Enable Verbose Output"
+    )
+    group.add_argument("-q", "-quiet", action="store_true", help="Supress Output")
 
-    folder_path_arg = None
-    if len(sys.argv) >= 3:
-        folder_path_arg = sys.argv[2]
-    target_folder = folder_path_arg
+    parser.add_argument(
+        "--logfile", action="store_true", help="Log to file instead of just console"
+    )
 
-    if target_folder is None:
-        print(f"No Folder path has been given for the {command}")
-        target_folder = input("Enter the absoulte folder path: ").strip()
-        if not target_folder:  # if the USERRRR press ENTER
-            print("ABORTING, Exiting")
-            sys.exit(1)
+    parser.add_argument(
+        "--recursive", action="store_true", help="Also organize files in subdirectories"
+    )
 
+    # this  we  are gonnnnnna  use  to make the version of  the cli
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="File Organizer CLI version 1.0.0",
+        help="Show program's version number and exit",
+    )
+
+    args = parser.parse_args()
+
+    setup_logging(verbose=args.verbose, quiet=args.quiet, log_to_file=args.logfile)
+    command = args.command
+
+    target_folder = args.path
     if not os.path.isdir(target_folder):
         logger.warning("❌ It is  not  a folder/directory ")
         sys.exit(1)
@@ -219,4 +227,4 @@ if __name__ == "__main__":
         print(f"❌ Error: Unkown command {command}")
         logger.warning(f"User entered unknown command: {command}")
         print("Use: python organize_file.py --help or --h, for usage instruction")
-        sys.exit(0)
+        sys.exit(1)
