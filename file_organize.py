@@ -187,11 +187,9 @@ if __name__ == "__main__":
     group.add_argument(
         "--verbose", "-v", action="store_true", help="Enable Verbose Output"
     )
-    group.add_argument("--quiet", "-q", action="store_true",
-                       help="Suppress Output")
+    group.add_argument("--quiet", "-q", action="store_true", help="Suppress Output")
 
-    parser.add_argument("--logfile", action="store_true",
-                        help="Log to file as well")
+    parser.add_argument("--logfile", action="store_true", help="Log to file as well")
     parser.add_argument(
         "--recursive", action="store_true", help="Organize subdirectories too"
     )
@@ -203,8 +201,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    setup_logging(verbose=args.verbose, quiet=args.quiet,
-                  log_to_file=args.logfile)
+    setup_logging(verbose=args.verbose, quiet=args.quiet, log_to_file=args.logfile)
 
     if not os.path.isdir(args.path):
         logger.warning("❌ Provided path is not a directory")
