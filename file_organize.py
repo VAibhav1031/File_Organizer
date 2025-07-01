@@ -62,12 +62,13 @@ def forbidden_path(folder_path):
     return True
 
 
-def organize_file(folder_path: str):
+def organize_file(folder_path: str, recursive=False):
     if not forbidden_path(folder_path):
         return
     files = os.listdir(folder_path)
 
     logger.info(f"📂 Starting organization in '{folder_path}'...")
+    file_moved = 0
     for file in files:
         logger.debug(f"Processing file: {file}")
         if (
@@ -75,12 +76,15 @@ def organize_file(folder_path: str):
             or file.lower().endswith((".db", ".ini"))
             or file.lower() in [".DS_Store", "Thumbs.db", "desktop.ini"]
             or file in FILE_TYPES.keys()
-            and os.path.isdir(os.path.join(folder_path, file))
+            or (os.path.isdir(os.path.join(folder_path, file)) and not recursive)
         ):
-            logger.warning("Skipping hidden/system file")
+            logger.debug("Skipping hidden/system file")
             continue
+
+        if os.path.isdir(os.path.join(folder_path, file)) and recursive:
+            organize_file(os.path.join(folder_path, file), recursive=recursive)
+
         file_path = os.path.join(folder_path, file)
-        file_moved = 0
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(file)
             ext = ext.lower()
@@ -111,7 +115,7 @@ def organize_file(folder_path: str):
     logger.info(f"✅ Organizing complete. Total file moved {file_moved}")
 
 
-def dry_run(folder_path: str):
+def dry_run(folder_path: str, recursive=False):
     if not forbidden_path(folder_path):
         return
 
@@ -133,9 +137,13 @@ def dry_run(folder_path: str):
             or file.lower().endswith((".db", ".ini"))
             or file.lower() in [".DS_Store", "Thumbs.db", "desktop.ini"]
             or file in FILE_TYPES.keys()
-            and os.path.isdir(os.path.join(folder_path, file))
+            or (os.path.isdir(os.path.join(folder_path, file)) and not recursive)
         ):
             continue
+
+        if os.path.isdir(os.path.join(folder_path, file)) and recursive:
+            # i think  in the recursive call it will run the function adn will do till the last file in that
+            dry_run(os.path.join(folder_path, file, recursive=recursive))
 
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(file)
@@ -150,9 +158,11 @@ def dry_run(folder_path: str):
 
             # Now, check if this folder *would be* created or already exists
             if destination_folder_name in would_be_created_folders:
-                chk_msg = f"Directory '{destination_folder_name}/' already exists."
+                chk_msg = f"Directory '{
+                    destination_folder_ndestination_folder_name}/' already exists."
             else:
-                chk_msg = f"We would create the folder '{destination_folder_name}/'."
+                chk_msg = f"We would create the folder '{
+                    destination_folder_name}/'."
                 would_be_created_folders.add(
                     destination_folder_name
                 )  # Mark it as "would be created"
@@ -178,9 +188,10 @@ if __name__ == "__main__":
     # grouping the conflicting optional arguments like --verbose and --quiet which can cause problem together
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-v", "--verbose", action="store_true", help=" Enable Verbose Output"
+        "-verbose", "-v", action="store_true", help=" Enable Verbose Output"
     )
-    group.add_argument("-q", "-quiet", action="store_true", help="Supress Output")
+    group.add_argument("--quiet", "-q", action="store_true",
+                       help="Supress Output")
 
     parser.add_argument(
         "--logfile", action="store_true", help="Log to file instead of just console"
@@ -200,16 +211,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    setup_logging(verbose=args.verbose, quiet=args.quiet, log_to_file=args.logfile)
-    command = args.command
-
-    target_folder = args.path
+    setup_logging(verbose=args.verbose, quiet=args.quiet,
+                  log_to_file=args.logfile)
+    command = args.command    target_folder = args.path
     if not os.path.isdir(target_folder):
         logger.warning("❌ It is  not  a folder/directory ")
         sys.exit(1)
 
     if command == "dry_run":
-        dry_run(target_folder)
+        dry_run(target_folder, args.recursive)
 
     elif command == "organize":
         print(
@@ -218,7 +228,7 @@ if __name__ == "__main__":
 
         confirm = input("Are you sure (YES/NO): ")
         if confirm.lower() == "yes":
-            organize_file(target_folder)
+            organize_file(target_folder, args.recursive)
         else:
             print("Operation Cancelled")
             sys.exit(0)
@@ -226,5 +236,7 @@ if __name__ == "__main__":
     else:
         print(f"❌ Error: Unkown command {command}")
         logger.warning(f"User entered unknown command: {command}")
+        print("Use: python organize_file.py --help or --h, for usage instruction")
+        sys.exit(1)
         print("Use: python organize_file.py --help or --h, for usage instruction")
         sys.exit(1)
