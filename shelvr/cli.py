@@ -1,7 +1,7 @@
 import os
 import shutil
 import sys
-from log_config import setup_logging
+from shelvr.log_config import setup_logging
 import logging
 import argparse
 from colorama import Fore, Style, init
@@ -169,9 +169,9 @@ def dry_run(folder_path: str, recursive=False, depth=0):
         logger.info("✅ Dry Run completed.")
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
-        description="📦 File Organizer CLI",
+        description="File Organizer CLI",
         epilog="Example: python organize.py organize ~/Downloads --verbose",
     )
     parser.add_argument(

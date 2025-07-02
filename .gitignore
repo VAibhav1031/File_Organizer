@@ -14,5 +14,11 @@ __pycache__/
 organize.log
 
 
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+
 #virtual
 .venv/
