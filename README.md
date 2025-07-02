@@ -19,5 +19,5 @@ file_organize.py organize ~/Downloads --loglevel DEBUG --logfile
 
 - [x] Adding Recursive (--recursive)  functionality for subfolder arrangement
 - [x] Refactoring to argparse from sys.argv for better usage and flexibility
-- Basic Test for evaluation
-
+- []  Basic Test for evaluation
+- []  Package

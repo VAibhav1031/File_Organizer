@@ -41,6 +41,12 @@ FORBIDDEN_PATHS = [
 ]
 
 
+# for semantic purpose when  we  used  to get the  pictures/ in os.listdir  and there is  Pictures/
+# in FILE_TYPES.keys() ,  so it will make mistake there
+
+CATEGORY_FOLDERS = set(folder.lower() for folder in FILE_TYPES)
+
+
 def color_level(level, text):
     colors = {
         "INFO": Fore.GREEN,
@@ -53,6 +59,13 @@ def color_level(level, text):
 
 def forbidden_path(folder_path):
     if os.path.abspath(folder_path) in FORBIDDEN_PATHS:
+        # os.path.abspath is  very important we cant directlly comapre the  folder_path to the FORBIDDEN_PATHS
+        # Sometime they dont like forbidden_path cause they are in absoulte states that why it can cause problem
+        # like
+        # "."  --> acts as Current working directory path
+        # ///user/  --> it is still /user/
+        # /../.. -->  this is imporatn like   when we use ../ it is reverseing back one director
+        # so os.path.abspath() helps in this  it may no check if direcotry  is valid but follow rule
         logger.warning("❌ Dangerous directory. Aborting.")
         return False
     return True
@@ -83,7 +96,7 @@ def _process_directory(folder_path, recursive, depth):
             file.startswith(".")
             or file.lower().endswith((".db", ".ini"))
             or file.lower() in [".DS_Store", "Thumbs.db", "desktop.ini"]
-            or file in FILE_TYPES.keys()
+            or file.lower() in CATEGORY_FOLDERS
         ):
             logger.debug("Skipping hidden/system file")
             continue
@@ -114,7 +127,7 @@ def organize_file(folder_path, recursive=False, depth=0):
     ):
         target_dir = os.path.join(folder_path, destination_folder)
         try:
-            os.makedir(target_dir, exist_ok=True)
+            os.makedirs(target_dir, exist_ok=True)
             shutil.move(file_path, target_dir)
             logger.info(f"Moved: '{file}' -> {destination_folder}/")
             file_moved += 1
@@ -129,7 +142,7 @@ def organize_file(folder_path, recursive=False, depth=0):
 
 
 def dry_run(folder_path: str, recursive=False, depth=0):
-    logger.info(f"\n📁 {Fore.CYAN}DRY RUN: {folder_path}{Style.RESET_ALL}\n")
+    logger.info(f"📁 DRY RUN: {Fore.CYAN}{folder_path}{Style.RESET_ALL}")
 
     try:
         would_be_created_folders = {
