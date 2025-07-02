@@ -59,8 +59,8 @@ shelvr dry_run ~/Desktop --logfile
 
 ## 🛠 Ongoing Development
 
-  * Recursive support (`--recursive`)
-  * Moved from `sys.argv` to `argparse`
+  * Undo operation command
+  * Moved from `sys.argv` to `argparse`, evolving in it , maybe change to `click` or `typer` in future
   * Logging to both console and file
   * Packaged and ready for PyPI
   * Basic unit tests (planned)
