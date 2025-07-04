@@ -1,11 +1,9 @@
 # 🌳 SHELVR — Smart File Organizer CLI
 
-[![PyPI version](https://img.shields.io/pypi/v/shelvr.svg)](https://pypi.org/project/shelvr/)
-[![Python versions](https://img.shields.io/pypi/pyversions/shelvr.svg)](https://pypi.org/project/shelvr/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Downloads](https://img.shields.io/pypi/dm/shelvr.svg)](https://pypi.org/project/shelvr/)
-[![GitHub stars](https://img.shields.io/github/stars/VAibhav1031/shelvr.svg)](https://github.com/VAibhav1031/shelvr/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/VAibhav1031/shelvr.svg)](https://github.com/VAibhav1031/shelvr/network)
+[![GitHub](https://img.shields.io/badge/GitHub-VAibhav1031%2Fshelvr-blue)](https://github.com/VAibhav1031/shelvr)
+[![Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/VAibhav1031/shelvr)
 
 A safe, extensible command-line tool for organizing files by type with support for dry runs, recursive operations, and comprehensive logging.
 
@@ -102,21 +100,6 @@ SHELVR organizes files into these default categories:
 | **Archives** | `.zip`, `.rar`, `.7z`, `.tar`, `.gz`, `.bz2` |
 | **Code** | `.py`, `.js`, `.html`, `.css`, `.java`, `.cpp`, `.c` |
 
-## 🔧 Configuration
-
-Create a `shelvr.config.json` file in your home directory to customize file type mappings:
-
-```json
-{
-  "file_types": {
-    "Documents": [".pdf", ".doc", ".docx", ".txt"],
-    "Images": [".jpg", ".jpeg", ".png", ".gif"],
-    "CustomFolder": [".custom", ".special"]
-  },
-  "ignored_extensions": [".tmp", ".cache"],
-  "create_date_folders": true
-}
-```
 
 ## 📊 Examples
 
@@ -162,19 +145,6 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- Built with Python 3.8+
-- Uses `argparse` for command-line parsing
-- Comprehensive logging with Python's `logging` module
-
-## 📞 Support
-
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/VAibhav1031/shelvr/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/VAibhav1031/shelvr/discussions)
-- 📚 **Documentation**: [Wiki](https://github.com/VAibhav1031/shelvr/wiki)
-
----
 
 <div align="center">
   <strong>Made with ❤️ by developers, for developers</strong>
