@@ -1,9 +1,10 @@
 # 🌳 SHELVR — Smart File Organizer CLI
 
+[![PyPI version](https://img.shields.io/pypi/v/shelvr.svg)](https://pypi.org/project/shelvr/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub](https://img.shields.io/badge/GitHub-VAibhav1031%2Fshelvr-blue)](https://github.com/VAibhav1031/shelvr)
-[![Status](https://img.shields.io/badge/status-active-brightgreen.svg)](https://github.com/VAibhav1031/shelvr)
+[![GitHub stars](https://img.shields.io/github/stars/VAibhav1031/shelvr.svg?style=social)](https://github.com/VAibhav1031/shelvr/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/VAibhav1031/shelvr.svg?style=social)](https://github.com/VAibhav1031/shelvr/network)
 
 A safe, extensible command-line tool for organizing files by type with support for dry runs, recursive operations, and comprehensive logging.
 
